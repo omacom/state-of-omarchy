@@ -39,7 +39,7 @@ survey:
   title: State of Omarchy
   hashtag: StateOfOmarchy
   estimatedMinutes: 8
-  version: 2
+  version: 3
 
 sections:
   - id: setup
@@ -85,6 +85,8 @@ sections:
             label: Virtual machine
           - id: try_omarchy_macos
             label: Try Omarchy app on macOS
+          - id: try_omarchy_windows
+            label: Try Omarchy app on Windows
           - id: apple_silicon
             label: Apple Silicon / Asahi-style install
           - id: other
@@ -209,6 +211,17 @@ sections:
             label: Apple Silicon
           - id: mixed
             label: Mixed / other
+
+      - id: multi_monitor
+        type: single
+        prompt: How many monitors do you run?
+        options:
+          - id: one
+            label: '1'
+          - id: two
+            label: '2'
+          - id: three_plus
+            label: '3+'
 
   - id: desktop
     title: Desktop Features
@@ -479,6 +492,24 @@ sections:
             label: Other
         allowOther: true
 
+      - id: shell_utilities
+        type: multiple
+        prompt: Which of these built-in tools do you actually use?
+        options:
+          - id: clipboard_history
+            label: Clipboard history
+          - id: screenshots_recording
+            label: Screenshots & recording
+          - id: dictation
+            label: Text extraction & dictation
+          - id: web_apps
+            label: Web apps (installed as native-feeling apps)
+          - id: omarchy_cli
+            label: Omarchy CLI (omarchy-* commands)
+          - id: none
+            label: None of these
+        exclusiveOptions: [none]
+
   - id: plugins
     title: Plugins
     description: The plugin system.
@@ -712,6 +743,37 @@ sections:
             label: Concerned
           - id: dealbreaker
             label: Dealbreaker
+
+  - id: gaming
+    title: Gaming
+    description: Steam, Proton, and game streaming.
+    questions:
+      - id: games_on_omarchy
+        type: single
+        required: true
+        prompt: Do you game on Omarchy?
+        options:
+          - id: steam
+            label: Yes — Steam / Proton
+          - id: streaming
+            label: Yes — streaming from another PC (Moonlight)
+          - id: battlenet
+            label: Yes — Battle.net
+          - id: no
+            label: No
+
+      - id: gaming_satisfaction
+        type: scale
+        prompt: How's the gaming experience?
+        showIf:
+          questionId: games_on_omarchy
+          op: includesAny
+          values: [steam, streaming, battlenet]
+        min: 1
+        max: 5
+        labels:
+          1: Rough
+          5: Better than I expected
 
   - id: opinions
     title: Opinions
