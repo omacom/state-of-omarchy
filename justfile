@@ -8,13 +8,23 @@ alias p := preview
 alias f := fix
 alias sl := survey-lint
 alias i := install
+alias t := test
 
-# Type-check, auto-format, then lint (format runs before lint so a dirty
-# formatting pass never fails the check on its own).
+# Type-check, auto-format, lint, then run the test suite (format runs before lint so
+# a dirty formatting pass never fails the check on its own).
 check:
     pnpm check
     pnpm format
     pnpm lint
+    pnpm test
+
+# Runs the unit test suite once (vitest run).
+test:
+    pnpm test
+
+# vitest in watch mode, for keeping a terminal open during a coding session.
+test-watch:
+    pnpm test:watch
 
 # Auto-fix what can be auto-fixed: formatting + eslint --fix.
 fix:
