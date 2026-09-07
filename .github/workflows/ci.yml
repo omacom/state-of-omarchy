@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: 'file:local.db'
-      DATABASE_AUTH_TOKEN: ''
+      DATABASE_AUTH_TOKEN: 'ci-local-db-no-token-needed'
       ORIGIN: 'http://localhost:5173'
       BETTER_AUTH_SECRET: 'ci-only-secret-not-for-production'
       RESEND_API_KEY: 're_ci_dummy_key'
