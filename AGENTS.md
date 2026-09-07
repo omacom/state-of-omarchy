@@ -15,6 +15,8 @@ This is a web application for a yearly survey on [Omarchy Linux](https://oomarch
 
 Always use shadcn-svelte UI components for UI elements.
 
+Use `just c` to check the codebase for any issues or suggestions.
+
 ## Data-driven survey rule (hard rule, all editions)
 
 `src/lib/surveys/<year>/survey.yml` is the single source of truth for website, components,
