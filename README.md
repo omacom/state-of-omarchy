@@ -2,14 +2,12 @@
 <img src="./src/lib/assets/soo-logo.png" width="300">
 </div>
 
-## WIP
-
 Yearly survey for Omarchy Linux.
 
 - [x] Waitlist feature before launch.
 - [x] Passwordless auth (email link or code) -> one response per account.
 - [x] Questionnaire driven entirely by `src/lib/surveys/<year>/survey.yml`.
-- [ ] Results: Charts and visualizations of survey results.
+- [ ] Report: Charts and visualizations of survey results (After survey is launched).
 
 ## Architecture
 
