@@ -2,10 +2,21 @@
 <img src="./src/lib/assets/soo-logo.png" width="300">
 </div>
 
-Yearly survey for Omarchy Linux. Passwordless auth (email link or code), one response per
-account, and a questionnaire driven entirely by `src/lib/surveys/<year>/survey.yml`.
+## WIP
 
-## Setup
+Yearly survey for Omarchy Linux.
+
+- [x] Waitlist feature before launch.
+- [x] Passwordless auth (email link or code) -> one response per account.
+- [x] Questionnaire driven entirely by `src/lib/surveys/<year>/survey.yml`.
+- [ ] Results: Charts and visualizations of survey results.
+
+## Architecture
+
+SvelteKit app (adapter-node) backed by Turso (libsql via Drizzle) and Better Auth for
+passwordless (magic link / OTP) sign-in, with Resend for email delivery.
+
+## Development
 
 Clone the project and install dependencies with `pnpm install`, then copy `.env.example` to `.env` and fill in the values below.
 
