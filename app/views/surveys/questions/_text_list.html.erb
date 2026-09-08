@@ -1,0 +1,26 @@
+<%# locals: (question:, value:) %>
+<% items = value&.kind == "list" ? value.items : []
+   hard_cap = 20
+   max = question.limit || hard_cap %>
+<div class="space-y-2" role="group" aria-labelledby="<%= question.dom_id %>" data-controller="text-list"
+     data-text-list-max-value="<%= max %>" data-text-list-limit-value="<%= question.limit %>" data-text-list-prompt-value="<%= question.prompt %>"
+     data-text-list-placeholder-value="<%= question.placeholder %>">
+  <div class="space-y-2" data-text-list-target="items">
+    <% items.each_with_index do |item, i| %>
+      <div class="flex items-center gap-2" data-text-list-target="item">
+        <input type="text" name="<%= answer_field(question, :items, array: true) %>" value="<%= item %>" class="input"
+               placeholder="<%= question.placeholder || "Entry #{i + 1}" %>" aria-label="<%= question.prompt %> <%= i + 1 %>">
+        <button type="button" class="btn btn-ghost btn-icon" data-action="text-list#remove" aria-label="Remove entry <%= i + 1 %>"><%= icon "close" %></button>
+      </div>
+    <% end %>
+  </div>
+  <template data-text-list-target="template">
+    <div class="flex items-center gap-2" data-text-list-target="item">
+      <input type="text" name="<%= answer_field(question, :items, array: true) %>" value="" class="input">
+      <button type="button" class="btn btn-ghost btn-icon" data-action="text-list#remove"><%= icon "close" %></button>
+    </div>
+  </template>
+  <button type="button" class="btn btn-outline btn-sm" data-action="text-list#add" data-text-list-target="add" <%= "hidden" if items.length >= max %>>
+    Add<%= " (#{items.length}/#{question.limit})" if question.limit %>
+  </button>
+</div>

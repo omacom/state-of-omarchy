@@ -1,0 +1,19 @@
+<div data-controller="dialog">
+  <button type="button" class="btn btn-link" data-action="dialog#open">Why do I need an account?</button>
+  <dialog class="dialog" data-dialog-target="dialog" data-action="click->dialog#backdropClose" aria-labelledby="why-account-title">
+    <div class="dialog-header">
+      <h2 id="why-account-title" class="dialog-title">Why do I need an account?</h2>
+    </div>
+    <div class="space-y-3 py-4">
+      <ul class="list-inside list-disc space-y-2 text-sm text-muted-foreground">
+        <li>We send a sign-in link to verify your email, so each person submits once.</li>
+        <li>There is no password to remember — the link signs you in.</li>
+        <li>We want to notify you when results are published.</li>
+        <li>We want to notify you of future surveys.</li>
+      </ul>
+    </div>
+    <div class="dialog-footer">
+      <button type="button" class="btn" data-action="dialog#close">Got it</button>
+    </div>
+  </dialog>
+</div>

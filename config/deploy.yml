@@ -1,0 +1,60 @@
+# Deploy with Kamal: `kamal setup` once, then `kamal deploy`.
+# Secrets come from .kamal/secrets (read from your shell environment).
+service: soo
+image: tahayvr/soo
+
+servers:
+  web:
+    - 0.0.0.0 # <- your server IP or hostname
+
+# Automatic SSL via Let's Encrypt and HTTP/2 through kamal-proxy.
+proxy:
+  ssl: true
+  host: stateofomarchy.com # <- the public hostname
+
+# Image registry. Set KAMAL_REGISTRY_PASSWORD in your shell (see .kamal/secrets).
+registry:
+  username: tahayvr
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - RESEND_API_KEY
+  clear:
+    # Public origin (no scheme) used for emailed links and social tags.
+    APP_HOST: stateofomarchy.com
+    MAILER_FROM: "State of Omarchy <survey@omarchy.org>"
+    # Waitlist mode until launch day. Flip to "true" and `kamal deploy` to open the survey.
+    SURVEY_LAUNCHED: "false"
+    SURVEY_EDITION: "2026"
+    # Run Solid Queue (magic-link cleanup, etc.) inside Puma — no separate job container.
+    SOLID_QUEUE_IN_PUMA: "true"
+    # Match the number of cores on the server.
+    WEB_CONCURRENCY: 1
+    JOB_CONCURRENCY: 1
+
+# Handy aliases: `kamal console`, `kamal shell`, `kamal logs`, `kamal dbc`.
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole"
+  notify-waitlist: app exec --reuse "bin/rails waitlist:notify"
+  survey-lint: app exec --reuse "bin/rails survey:lint"
+
+# Persistent volume for the SQLite databases (storage/production*.sqlite3).
+# Point this at a mounted volume that is backed up off-server.
+volumes:
+  - "soo_storage:/rails/storage"
+
+# Bridge fingerprinted assets between versions so in-flight requests never 404.
+asset_path: /rails/public/assets
+
+builder:
+  arch: amd64
+
+# Use a different ssh user than root
+# ssh:
+#   user: app

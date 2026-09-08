@@ -1,0 +1,80 @@
+<% survey = current_survey
+   index = survey.section_index(@section)
+   total = survey.sections.length
+   last = index == total - 1
+   counts = survey.section_counts(@section, @answers)
+   visible_index = 0 %>
+<%= seo_tags "Survey — #{@section.title} · #{site_title}" %>
+
+<div class="mx-auto w-full max-w-2xl px-4 py-8" data-controller="dialog">
+  <%= form_with url: survey_path(s: @section.id), method: :patch, id: "survey-form",
+        data: { controller: "autosave visibility",
+                action: "input->autosave#schedule change->autosave#schedule turbo:submit-start->autosave#cancel change->visibility#update" } do |f| %>
+
+    <header class="sticky top-0 z-10 space-y-2 bg-background/95 py-4 backdrop-blur">
+      <div class="flex items-baseline justify-between gap-4">
+        <p class="text-sm text-muted-foreground">Section <%= index + 1 %> of <%= total %></p>
+        <span class="save-state flex h-5 shrink-0 items-center" aria-live="polite" data-autosave-target="status" data-state="idle">
+          <span class="spinner text-muted-foreground" data-when="saving" role="status" aria-label="Saving answers"></span>
+          <%= icon "check", class: "size-4 text-muted-foreground", "data-when": "saved", "aria-label": "Answers saved" %>
+          <span class="text-sm text-destructive" data-when="error">Save failed — retrying on next change</span>
+        </span>
+      </div>
+      <%= render "surveys/progress", survey: survey, answers: @answers %>
+      <div class="flex items-baseline justify-between gap-4">
+        <h1 id="survey-section-heading" tabindex="-1" class="text-xl font-semibold outline-none" data-controller="focus"><%= @section.title %></h1>
+        <p id="survey-section-counts" class="shrink-0 text-sm text-muted-foreground" aria-live="polite">
+          <%= render "surveys/counts", counts: counts %>
+        </p>
+      </div>
+      <% if @section.description.present? %>
+        <p class="text-sm text-muted-foreground"><%= @section.description %></p>
+      <% end %>
+    </header>
+
+    <div class="mt-4 space-y-8">
+      <% @section.questions.each do |question| %>
+        <% visible = survey.visible?(question, @answers) %>
+        <%= render "surveys/question", question: question, value: @answers[question.id], error: @errors[question.id],
+              visible: visible, answered: survey.answered?(question, @answers[question.id]),
+              delay: visible ? 40 + [ visible_index, 8 ].min * 40 : 0 %>
+        <% visible_index += 1 if visible %>
+      <% end %>
+    </div>
+
+    <footer class="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+      <% if @errors.any? %>
+        <p class="field-description mx-auto mb-2 w-full max-w-2xl text-center text-destructive" role="alert">
+          Something needs attention above before continuing.
+        </p>
+      <% end %>
+      <div class="mx-auto flex w-full max-w-2xl items-center gap-2">
+        <%= f.button "Back", type: "submit", name: "commit", value: "back", class: "btn btn-outline shrink-0", formnovalidate: true, disabled: index.zero? %>
+        <nav aria-label="Jump to section" id="survey-stepper" data-controller="stepper"
+             class="flex min-w-0 flex-1 [scrollbar-width:none] items-center justify-center gap-1.5 overflow-x-auto py-1 [&::-webkit-scrollbar]:hidden">
+          <%= render "surveys/stepper", survey: survey, answers: @answers, section: @section %>
+        </nav>
+        <% if last %>
+          <button type="button" class="btn shrink-0" data-action="dialog#open">Submit</button>
+        <% else %>
+          <%= f.button "Next", type: "submit", name: "commit", value: "next", class: "btn shrink-0", formnovalidate: true %>
+        <% end %>
+      </div>
+    </footer>
+    <%# Spacer so the fixed footer never covers the last question. %>
+    <div class="h-24" aria-hidden="true"></div>
+
+    <dialog class="dialog max-w-sm" data-dialog-target="dialog" data-action="click->dialog#backdropClose" aria-labelledby="submit-dialog-title">
+      <div class="dialog-header">
+        <h2 id="submit-dialog-title" class="dialog-title">Submit your response?</h2>
+        <p class="dialog-description" id="survey-submit-summary">
+          <%= render "surveys/submit_summary", survey: survey, answers: @answers %>
+        </p>
+      </div>
+      <div class="dialog-footer gap-2">
+        <button type="button" class="btn btn-outline" data-action="dialog#close">Keep editing</button>
+        <%= f.button "Yes, submit", type: "submit", name: "commit", value: "submit", class: "btn", formnovalidate: true, data: { turbo_submits_with: "Submitting…" } %>
+      </div>
+    </dialog>
+  <% end %>
+</div>

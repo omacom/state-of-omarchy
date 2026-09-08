@@ -1,0 +1,17 @@
+<%# locals: (survey:, answers:, section:) %>
+<% survey.sections.each_with_index do |s, i| %>
+  <% complete = survey.section_completion(s, answers) == 100
+     current = s == section %>
+  <button type="submit" name="jump_to" value="<%= s.id %>" formnovalidate data-section-step="<%= s.id %>"
+          aria-current="<%= 'step' if current %>" aria-label="<%= i + 1 %>. <%= s.title %><%= ' — complete' if complete %>" title="<%= s.title %>"
+          class="<%= cn('flex size-8 shrink-0 scroll-mx-2 items-center justify-center rounded-full border text-xs font-medium transition-colors',
+                        current ? 'border-primary bg-primary text-primary-foreground' :
+                        complete ? 'border-primary/40 bg-primary/10 text-primary' :
+                        'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground') %>">
+    <% if complete && !current %>
+      <%= icon "check", class: "size-4" %>
+    <% else %>
+      <%= i + 1 %>
+    <% end %>
+  </button>
+<% end %>

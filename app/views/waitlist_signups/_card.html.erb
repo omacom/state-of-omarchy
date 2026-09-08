@@ -1,0 +1,29 @@
+<% joined = flash[:waitlist] %>
+<div class="card animate-stage w-full max-w-md bg-transparent">
+  <% if joined %>
+    <div class="card-content space-y-2 text-center">
+      <p class="text-sm font-medium"><%= joined["already_joined"] ? "You're already on the list" : "You're on the list" %></p>
+      <p class="field-description">
+        We'll email <span class="font-medium text-foreground"><%= joined["email"] %></span> when survey is live.
+      </p>
+    </div>
+  <% else %>
+    <div class="card-header text-center">
+      <h1 class="card-title">Don't miss the survey</h1>
+      <p class="card-description">Leave your email. We'll let you know the moment the survey opens.</p>
+    </div>
+    <div class="card-content">
+      <%= form_with url: waitlist_signup_path(src: params[:src].presence), class: "space-y-4" do |f| %>
+        <div class="field">
+          <%= f.label :email_address, "Email address", class: "sr-only" %>
+          <%= f.email_field :email_address, required: true, placeholder: "Email", autocomplete: "email",
+                class: "input w-full", value: params[:email_address], "aria-invalid": flash[:alert].present? %>
+          <% if flash[:alert] %>
+            <p class="field-description text-destructive" role="alert"><%= flash[:alert] %></p>
+          <% end %>
+        </div>
+        <%= f.button "Notify me", type: "submit", class: "btn w-full", data: { turbo_submits_with: "Joining…" } %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

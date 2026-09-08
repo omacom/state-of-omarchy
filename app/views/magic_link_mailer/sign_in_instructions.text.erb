@@ -1,0 +1,9 @@
+Sign in to the <%= @survey.title %> <%= @survey.year %> survey.
+
+Click this link (expires in <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>, single use):
+<%= @url %>
+
+Or enter this code on the sign-in page:
+<%= @magic_link.code %>
+
+If you didn't request this, you can ignore this email.

@@ -1,0 +1,43 @@
+<% share_text = "I just completed the #{site_title} survey! #{request.base_url} ##{current_survey.hashtag.presence || 'StateOfOmarchy'}"
+   x_url = "https://x.com/intent/post?text=#{ERB::Util.url_encode(share_text)}"
+   ctas = [
+     { href: "https://donate.omarchy.org", icon: "heart", title: "Become a Patron of Omarchy" },
+     { href: "https://supply.37signals.com/collections/omarchy", icon: "t-shirt", title: "Get Omarchy Merch" }
+   ] %>
+<%= seo_tags "Thanks — #{site_title}" %>
+<div class="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center justify-center gap-6 px-4 py-12">
+  <%= render "shared/logo", size: "sm", tagline: false %>
+
+  <div class="animate-fly-in w-full" style="animation-delay: 80ms; animation-duration: 300ms">
+    <div class="card w-full bg-transparent">
+      <div class="card-header text-center">
+        <h1 class="card-title">You're in the record books</h1>
+        <p class="card-description">
+          <%= @answered %> answers now locked in for <%= current_user.email_address %>. thanks for taking the time.
+        </p>
+      </div>
+      <div class="card-content flex flex-col items-center gap-4">
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <%= link_to "Share on X", x_url, target: "_blank", rel: "noopener", class: "btn btn-sm" %>
+        </div>
+        <p class="text-center text-xs text-muted-foreground">
+          We're crunching every response into a proper results site. watch for the announcement when it's live.
+        </p>
+        <%= link_to "Back home", root_path, class: "btn btn-ghost btn-sm" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="animate-fly-in grid w-full gap-3 sm:grid-cols-2" style="animation-delay: 200ms; animation-duration: 300ms">
+    <% ctas.each do |item| %>
+      <a href="<%= item[:href] %>" target="_blank" rel="noopener"
+         class="group flex items-center gap-3 rounded-lg border border-border/60 bg-card/50 p-4 transition-colors hover:border-primary/40">
+        <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <%= icon item[:icon], class: "size-5" %>
+        </span>
+        <p class="flex-1 text-sm font-medium"><%= item[:title] %></p>
+        <%= icon "arrow-right-up", class: "size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" %>
+      </a>
+    <% end %>
+  </div>
+</div>

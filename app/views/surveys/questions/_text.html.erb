@@ -1,0 +1,10 @@
+<%# locals: (question:, value:) %>
+<% text = value&.kind == "text" ? value.text : "" %>
+<div class="space-y-2" data-controller="char-count">
+  <textarea name="<%= answer_field(question, :text) %>" rows="3" class="textarea" placeholder="<%= question.placeholder || 'Your answer' %>"
+            <%= "maxlength=#{question.max_length}" if question.max_length %> aria-labelledby="<%= question.dom_id %>"
+            data-char-count-target="input" data-action="input->char-count#update"><%= text %></textarea>
+  <% if question.max_length %>
+    <p class="field-description"><span data-char-count-target="count"><%= text.length %></span> / <%= question.max_length %></p>
+  <% end %>
+</div>

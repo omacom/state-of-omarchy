@@ -1,0 +1,29 @@
+<header class="absolute top-0 right-0 left-0 z-20 flex items-center justify-end gap-2 p-4">
+  <% if authenticated? %>
+    <%= link_to "Survey", survey_path, class: "btn btn-ghost btn-sm" %>
+    <button type="button" class="btn btn-ghost btn-sm" popovertarget="account-menu"
+            aria-label="Account options for <%= current_user.email_address %>">
+      <span class="max-w-40 truncate"><%= current_user.email_address %></span>
+    </button>
+    <div id="account-menu" popover class="popover popover-header w-56 p-1">
+      <p class="truncate px-2 py-1.5 text-xs text-muted-foreground"><%= current_user.email_address %></p>
+      <% if survey_status %>
+        <p class="px-2 pb-1.5 text-xs text-muted-foreground" aria-live="polite">
+          <% if survey_status[:submitted] %>
+            Survey submitted ✓
+          <% else %>
+            Survey draft · <%= survey_status[:completion] %>% complete
+          <% end %>
+        </p>
+      <% end %>
+      <%= button_to "Sign out", session_path, method: :delete, class: "btn btn-ghost btn-sm w-full justify-start", form_class: "w-full" %>
+    </div>
+  <% end %>
+  <div class="fixed top-4 left-4">
+    <button type="button" class="btn btn-ghost btn-icon relative" data-controller="theme" data-action="theme#toggle">
+      <%= icon "sun", class: "size-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" %>
+      <%= icon "moon", class: "absolute size-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" %>
+      <span class="sr-only">Toggle theme</span>
+    </button>
+  </div>
+</header>

@@ -1,85 +1,109 @@
 <div align="center">
-<img src="./src/lib/assets/soo-logo.png" width="300">
+<img src="./app/assets/images/soo-logo.png" width="300">
 </div>
 
 Yearly survey for Omarchy Linux.
 
 - [x] Waitlist feature before launch.
 - [x] Passwordless auth (email link or code) -> one response per account.
-- [x] Questionnaire driven entirely by `src/lib/surveys/<year>/survey.yml`.
+- [x] Questionnaire driven entirely by `surveys/<year>/survey.yml`.
 - [ ] Report: Charts and visualizations of survey results (After survey is launched).
 
 ## Architecture
 
-SvelteKit app (adapter-node) backed by Turso (libsql via Drizzle) and Better Auth for
-passwordless (magic link / OTP) sign-in, with Resend for email delivery.
+A self-contained Ruby on Rails 8 app: SQLite for the database (Solid Queue and Solid Cache
+run on it too), Hotwire (Turbo + Stimulus) for the front end, Tailwind CSS compiled by the
+standalone CLI (no Node), and Resend (over SMTP) for email. Deployed as a single container
+with Kamal.
+
+Sign-in is passwordless and modelled on [Fizzy](https://github.com/basecamp/fizzy): entering
+an email mints a `MagicLink` with a 6-character code and a long single-use token, both
+expiring in 15 minutes. The code only works in the browser that requested it (a signed,
+short-lived cookie carries the pending email address); the emailed link works from any device.
+Either consumes the link and starts a `Session` row referenced by a signed cookie.
+
+```
+app/controllers/concerns/authentication.rb     session cookie <-> Session row
+app/controllers/concerns/authentication/       pending-email cookie for the typed code
+app/models/magic_link.rb                       code + token, expiry, consume, cleanup
+lib/survey/                                    yml -> definition, visibility, validation, progress, lint
+app/models/response.rb, answer.rb              one response per user per edition; normalized answers
+app/views/surveys/                             one page per section; autosave via Turbo Streams
+app/javascript/controllers/                    Stimulus: autosave, showIf, choice limits, slider, lists
+```
 
 ## Development
 
-Clone the project and install dependencies with `pnpm install`, then copy `.env.example` to `.env` and fill in the values below.
+Requires Ruby (see `.ruby-version`); everything else is a gem. Copy `.env.example` only if
+you want to override defaults — nothing is required locally.
 
 ```sh
-pnpm install
-cp .env.example .env   # then fill in the values below
+bundle install
+bin/rails db:prepare
+bin/dev            # Rails server + Tailwind watcher on http://localhost:3000
 ```
 
-| Variable                               | Purpose                                                                                |
-| -------------------------------------- | -------------------------------------------------------------------------------------- |
-| `DATABASE_URL` / `DATABASE_AUTH_TOKEN` | Turso database (for dev: `file:local.db`)                                              |
-| `ORIGIN`                               | App URL (`http://localhost:5173` in dev)                                               |
-| `BETTER_AUTH_SECRET`                   | Auth secret (`openssl rand -base64 32`)                                                |
-| `RESEND_API_KEY`                       | Resend key (leave empty in dev: magic links & OTP codes print in the terminal instead) |
-| `RESEND_FROM`                          | Verified sender, needed for real delivery                                              |
-| `SURVEY_LAUNCHED`                      | `false`/unset shows the waitlist on `/`; `true` opens the real survey (see below)      |
+In development the survey is launched by default and no email is sent: the sign-in code
+and link are shown on the "check your inbox" page and in the server log.
 
-Push the schema, then start developing:
+| Variable          | Purpose                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| `APP_HOST`        | Public origin without scheme (`localhost:3000` in dev). Used for emailed links and og tags.   |
+| `RESEND_API_KEY`  | Resend key; production delivers through `smtp.resend.com:465` with username `resend`.         |
+| `MAILER_FROM`     | Verified sender, needed for real delivery.                                                     |
+| `SURVEY_LAUNCHED` | `false`/unset shows the waitlist on `/`; `true` opens the survey. Dev defaults to `true`.     |
+| `SURVEY_EDITION`  | Edition served at `/survey` (a directory under `surveys/`). Defaults to `2026`.                |
+
+Useful commands (see `justfile`):
 
 ```sh
-pnpm db:push --force   # creates auth + survey tables (dev only; use generate+migrate in prod)
-pnpm dev
+just check           # survey lint + rubocop + brakeman + tests (what CI runs)
+just test            # bin/rails test
+just survey-lint     # validate surveys/*/survey.yml — run after ANY question/option edit
+just notify-waitlist # launch-day email to everyone on the waitlist
 ```
 
 ## Pre-launch Waitlist
 
-The site can go live before the survey itself opens. While `SURVEY_LAUNCHED` is `false`/unset,
-`/` shows a simple email-capture waitlist instead of the sign-in flow, and every `/survey*`
-route redirects home regardless of session state — so there's no way to reach the survey early.
-Signups live in the `waitlist_signups` table (`src/lib/server/db/waitlist.schema.ts`); the
-same email can submit more than once without erroring (it's just told it's already on the list).
+While `SURVEY_LAUNCHED` is `false`/unset, `/` shows a simple email-capture waitlist instead
+of the sign-in flow, and every `/survey*` and sign-in route redirects home regardless of
+session state. Signups live in `waitlist_signups`; the same email can submit more than once
+without erroring (it's just told it's already on the list).
 
 **Launch day:**
 
-1. Set `SURVEY_LAUNCHED=true` in the environment and redeploy. `/` now shows the normal
-   passwordless sign-in flow, and `/survey*` is reachable again.
+1. Set `SURVEY_LAUNCHED: "true"` in `config/deploy.yml` and `kamal deploy`.
 2. Email everyone who joined the waitlist:
 
    ```sh
-   pnpm notify:waitlist   # or: just notify-waitlist
+   kamal notify-waitlist      # alias for: bin/rails waitlist:notify inside the container
    ```
 
-   This runs standalone (outside SvelteKit/Vite), reading `.env` directly. It only emails
-   addresses that haven't been notified yet, marking each as sent as it goes — so if a run
-   fails partway through, re-running it just retries what's left.
+   Only addresses that haven't been notified yet are emailed, each marked as sent as it
+   goes — re-running after a partial failure just retries what's left.
 
 ## Survey Questions
 
-Editing questions or options in `src/lib/surveys/<year>/survey.yml` needs no code changes:
-renderers, validation, storage, and progress are all derived from the yml by type.
-
-Run `pnpm survey:lint` after editing. It fails on duplicate ids, unknown types, and broken `showIf` references.
+Editing questions or options in `surveys/<year>/survey.yml` needs no code changes:
+renderers, validation, storage and progress are all derived from the yml by question type.
 
 ```sh
-pnpm survey:lint  # validate survey.yml — run after ANY question/option edit
+bin/rails survey:lint   # fails on duplicate ids, unknown types, broken showIf references
 ```
 
-New edition = new `src/lib/surveys/<year>/` directory;
+New edition = new `surveys/<year>/` directory + `SURVEY_EDITION=<year>`.
 
-## Building
+## Deployment
 
-To create a production version of the app:
+Kamal builds the `Dockerfile` and runs it behind kamal-proxy with automatic SSL. The SQLite
+databases live on the `soo_storage` volume — back that volume up.
 
 ```sh
-pnpm build
+export KAMAL_REGISTRY_PASSWORD=... RESEND_API_KEY=...   # read by .kamal/secrets
+kamal setup      # first time
+kamal deploy     # every time after
+kamal console    # rails console in production
 ```
 
-You can preview the production build with `pnpm preview`.
+Edit `config/deploy.yml` for the server IP, hostname, registry and `APP_HOST`. Recurring
+jobs (expired magic-link cleanup) run inside the app container via Solid Queue.

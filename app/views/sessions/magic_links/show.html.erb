@@ -1,0 +1,48 @@
+<%= seo_tags "Check your inbox — #{site_title}" %>
+<%= render layout: "shared/centered" do %>
+  <%= render "shared/logo" %>
+  <div class="card animate-stage w-full max-w-md bg-transparent">
+    <div class="card-content space-y-4 text-center">
+      <p class="text-sm font-medium">Check your inbox</p>
+      <p class="field-description">
+        We sent <span class="font-medium text-foreground"><%= email_address_pending_authentication %></span> a link and a
+        <%= MagicLink::CODE_LENGTH %>-character code — either works, both expire in <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.
+      </p>
+
+      <%= form_with url: session_magic_link_path, class: "space-y-3", data: { controller: "otp", otp_length_value: MagicLink::CODE_LENGTH } do |f| %>
+        <div class="field items-center">
+          <%= f.label :code, "#{MagicLink::CODE_LENGTH}-character code", class: "sr-only" %>
+          <%= f.text_field :code, class: "otp-input", maxlength: MagicLink::CODE_LENGTH, autofocus: true, required: true,
+                autocomplete: "one-time-code", autocapitalize: "characters", autocorrect: "off", spellcheck: false,
+                inputmode: "text", placeholder: "••••••", "data-1p-ignore": true, "aria-invalid": flash[:alert].present?,
+                data: { otp_target: "input", action: "input->otp#changed paste->otp#paste" } %>
+          <% if flash[:alert] %>
+            <p class="field-description text-destructive" role="alert"><%= flash[:alert] %></p>
+          <% end %>
+        </div>
+        <%= f.button "Sign in with code", type: "submit", class: "btn w-full", disabled: true,
+              data: { otp_target: "submit", turbo_submits_with: "Signing in…" } %>
+      <% end %>
+
+      <div class="flex flex-col items-center gap-1">
+        <div class="flex items-center gap-1 text-sm">
+          <span class="text-muted-foreground">Didn't get it?</span>
+          <%= form_with url: session_path, data: { controller: "cooldown", cooldown_seconds_value: 20 } do |f| %>
+            <%= f.hidden_field :email_address, value: email_address_pending_authentication %>
+            <%= f.button "Send email again", type: "submit", class: "btn btn-link h-auto p-0 text-sm",
+                  data: { cooldown_target: "button", turbo_submits_with: "Resending…" } %>
+          <% end %>
+        </div>
+        <%= button_to "Use a different email", session_magic_link_path, method: :delete, class: "btn btn-link" %>
+      </div>
+    </div>
+  </div>
+
+  <% if Rails.env.development? && flash[:magic_link_code].present? %>
+    <div class="animate-stage w-full max-w-md border border-dashed border-primary/60 bg-card/50 p-4 text-sm">
+      <p class="mb-2 font-mono text-xs uppercase text-muted-foreground">Development only — email not sent</p>
+      <p>Code: <code class="font-mono text-lg font-bold text-primary"><%= flash[:magic_link_code] %></code></p>
+      <p class="mt-1 break-all">Link: <%= link_to flash[:magic_link_url], flash[:magic_link_url], class: "underline" %></p>
+    </div>
+  <% end %>
+<% end %>

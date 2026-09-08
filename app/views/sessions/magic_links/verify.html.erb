@@ -1,0 +1,16 @@
+<%= seo_tags "Signing you in — #{site_title}" %>
+<%= render layout: "shared/centered" do %>
+  <%= render "shared/logo" %>
+  <div class="card w-full max-w-md bg-transparent">
+    <div class="card-header text-center">
+      <h1 class="card-title">Signing you in…</h1>
+      <p class="card-description">One moment. If nothing happens, use the button below.</p>
+    </div>
+    <div class="card-content flex justify-center">
+      <%= form_with url: session_magic_link_path, class: "w-full max-w-xs", data: { controller: "autosubmit" } do |f| %>
+        <%= f.hidden_field :token, value: @token %>
+        <%= f.button "Continue to the survey", type: "submit", class: "btn w-full", data: { turbo_submits_with: "Signing in…" } %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

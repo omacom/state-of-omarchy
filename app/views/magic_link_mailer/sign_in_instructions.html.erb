@@ -1,0 +1,6 @@
+<h2 style="margin:0 0 12px">Sign in to <%= @survey.title %> <%= @survey.year %></h2>
+<p class="muted">Click the button below to sign in to the survey. The link expires in <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %> and can only be used once.</p>
+<%= link_to "Sign in to the survey", @url, class: "btn" %>
+<p class="muted">Or enter this code on the sign-in page. It expires in <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>:</p>
+<p class="code"><%= @magic_link.code %></p>
+<p class="fine">If you didn't request this, you can safely ignore this email.</p>

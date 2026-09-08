@@ -1,0 +1,21 @@
+<div class="card animate-stage w-full max-w-md bg-transparent">
+  <div class="card-header text-center">
+    <h1 class="card-title">Shape where Omarchy goes next</h1>
+  </div>
+  <div class="card-content">
+    <%= form_with url: session_path, class: "space-y-4" do |f| %>
+      <div class="field">
+        <%= f.label :email_address, "Email address", class: "sr-only" %>
+        <%= f.email_field :email_address, required: true, placeholder: "you@example.com", autocomplete: "email",
+              class: "input w-full", value: params[:email_address], "aria-invalid": flash[:alert].present? %>
+        <% if flash[:alert] %>
+          <p class="field-description text-destructive" role="alert"><%= flash[:alert] %></p>
+        <% end %>
+      </div>
+      <%= f.button "Send sign-in email", type: "submit", class: "btn w-full", data: { turbo_submits_with: "Sending…" } %>
+    <% end %>
+    <div class="mt-4 flex justify-center">
+      <%= render "sessions/why_account" %>
+    </div>
+  </div>
+</div>

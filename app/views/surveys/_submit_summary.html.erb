@@ -1,0 +1,3 @@
+<%# locals: (survey:, answers:) %>
+You've answered <%= survey.completion(answers) %>% of the survey across <%= survey.completed_section_count(answers) %> of
+<%= survey.sections.length %> sections. Submitting locks your response — you won't be able to change it afterwards.

@@ -1,0 +1,5 @@
+<%# locals: (survey:, answers:) %>
+<% progress = survey.completion(answers) %>
+<div id="survey-progress" class="progress" role="progressbar" aria-label="Survey progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= progress %>">
+  <div class="progress-indicator" style="transform: translateX(-<%= 100 - progress %>%)"></div>
+</div>

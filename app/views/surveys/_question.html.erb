@@ -1,0 +1,23 @@
+<%# locals: (question:, value:, error:, visible:, answered:, delay: 0) %>
+<%#
+  A native <legend> can't be trusted with a flex/wrap layout, so a plain group div
+  labelled by the prompt (every renderer also sets aria-labelledby on its inputs)
+  gives screen readers the same association without the quirk.
+  Questions hidden by showIf are still rendered (hidden) so a same-section target
+  can reveal them client-side; the server never stores answers to hidden questions.
+%>
+<div id="qc-<%= question.id %>" class="question-card animate-fly-in" style="animation-delay: <%= delay %>ms"
+     role="group" aria-labelledby="<%= question.dom_id %>" <%= "hidden" unless visible %>
+     data-controller="question" data-question-id="<%= question.id %>" data-answered="<%= answered %>"
+     data-action="input->question#changed change->question#changed" <%= tag.attributes(data: show_if_data(question)) %>>
+  <div class="flex flex-wrap items-center gap-2 text-sm font-medium">
+    <%= icon "check", class: "question-check size-4 shrink-0 text-primary" %>
+    <span id="<%= question.dom_id %>" class="min-w-0 break-words"><%= question.prompt.presence || "(Untitled question)" %></span>
+    <% unless question.required? %>
+      <span class="badge badge-outline">Optional</span>
+    <% end %>
+  </div>
+  <input type="hidden" name="<%= answer_field(question, :type) %>" value="<%= question.type %>">
+  <%= render partial: question_input_partial(question), locals: { question: question, value: value } %>
+  <p id="q-error-<%= question.id %>" class="field-description q-error text-destructive" role="alert"><%= error %></p>
+</div>

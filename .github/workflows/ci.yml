@@ -3,43 +3,52 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, rails-port]
 
 jobs:
-  ci:
+  lint:
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: 'file:local.db'
-      DATABASE_AUTH_TOKEN: 'ci-local-db-no-token-needed'
-      ORIGIN: 'http://localhost:5173'
-      BETTER_AUTH_SECRET: 'ci-only-secret-not-for-production'
-      RESEND_API_KEY: 're_ci_dummy_key'
-      RESEND_FROM: 'State of Omarchy <survey@omarchy.org>'
-      SURVEY_LAUNCHED: 'false'
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v7
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          node-version: 24
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          ruby-version: .ruby-version
+          bundler-cache: true
 
       - name: Lint survey.yml
-        run: pnpm survey:lint
+        run: bin/rails survey:lint
 
-      - name: Type check
-        run: pnpm check
+      - name: Lint code for consistent style
+        run: bin/rubocop -f github
 
-      - name: Test
-        run: pnpm test
+      - name: Scan for security vulnerabilities
+        run: bin/brakeman --no-pager
 
-      - name: Build
-        run: pnpm build
+      - name: Audit gems
+        run: bin/bundler-audit
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Run tests
+        env:
+          RAILS_ENV: test
+        run: bin/rails db:test:prepare test
+
+      - name: Build production assets
+        env:
+          RAILS_ENV: production
+          SECRET_KEY_BASE_DUMMY: 1
+        run: bin/rails assets:precompile

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>400 — State of Omarchy 2026</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#e1e2e7">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1a1b26">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <style>
+    :root { --background: #e1e2e7; --foreground: #343b58; --muted: #68709a; --border: #b4b5b9; --primary: #587539; --primary-foreground: #f2f3f7; }
+    @media (prefers-color-scheme: dark) {
+      :root { --background: #1a1b26; --foreground: #c0caf5; --muted: #a9b1d6; --border: #3b4261; --primary: #9ece6a; --primary-foreground: #1a1b26; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem;
+           background: var(--background); color: var(--foreground); font: 18px/1.5 Geist, system-ui, sans-serif; }
+    .card { width: 100%; max-width: 28rem; border: 1px solid var(--border); padding: 1.5rem; text-align: center; }
+    .code { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.875rem; color: var(--muted); margin: 0; }
+    h1 { font-size: 1.125rem; font-weight: 600; margin: 0.5rem 0 0.25rem; }
+    p { margin: 0; font-size: 0.875rem; color: var(--muted); }
+    .actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; }
+    a { display: inline-flex; align-items: center; justify-content: center; height: 2.25rem; padding: 0 1rem; font-size: 0.875rem; font-weight: 500; text-decoration: none; color: var(--foreground); border: 1px solid var(--border); }
+    a.primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="code" aria-hidden="true">400</p>
+    <h1>Bad request</h1>
+    <p>The server could not understand that request.</p>
+    <div class="actions">
+      <a href="/">Home</a>
+      <a class="primary" href="/survey">Back to survey</a>
+    </div>
+  </main>
+</body>
+</html>

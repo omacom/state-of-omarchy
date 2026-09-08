@@ -1,0 +1,11 @@
+<%# locals: (question:, value:) %>
+<% code = value&.kind == "country" ? value.code : "" %>
+<select name="<%= answer_field(question, :code) %>" class="select w-full max-w-sm" aria-labelledby="<%= question.dom_id %>">
+  <option value="">Select a country…</option>
+  <% Survey::Countries.all.each do |country| %>
+    <option value="<%= country.code %>" <%= "selected" if code == country.code %>><%= country.label %></option>
+  <% end %>
+  <% if question.skip_option %>
+    <option value="<%= question.skip_option.id %>" <%= "selected" if code == question.skip_option.id %>><%= question.skip_option.label %></option>
+  <% end %>
+</select>

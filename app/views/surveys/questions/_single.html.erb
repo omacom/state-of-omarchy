@@ -1,0 +1,18 @@
+<%# locals: (question:, value:) %>
+<% selected = value&.kind == "single" ? value.option_id : ""
+   other = value&.kind == "single" ? value.other.to_s : "" %>
+<div data-controller="choice" data-choice-other-id-value="<%= Survey::OTHER_OPTION_ID %>">
+  <div class="space-y-3" role="radiogroup" aria-labelledby="<%= question.dom_id %>">
+    <% question.options_for_display.each do |option| %>
+      <div class="flex items-center gap-3">
+        <input type="radio" id="<%= question.id %>-<%= option.id %>" name="<%= answer_field(question, :option_id) %>" value="<%= option.id %>"
+               class="radio" <%= "checked" if selected == option.id %> data-action="choice#changed">
+        <label for="<%= question.id %>-<%= option.id %>" class="label font-normal"><%= option.label.presence || option.id %></label>
+      </div>
+    <% end %>
+  </div>
+  <% if question.allow_other? %>
+    <input type="text" name="<%= answer_field(question, :other) %>" value="<%= other %>" placeholder="Please specify" aria-label="Please specify"
+           class="input mt-2 max-w-sm" data-choice-target="other" <%= "hidden" unless selected == Survey::OTHER_OPTION_ID %>>
+  <% end %>
+</div>

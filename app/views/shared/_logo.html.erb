@@ -1,0 +1,12 @@
+<%# locals: (size: "lg", tagline: true) %>
+<% width = size == "sm" ? "w-48" : "w-lg" %>
+<div class="flex flex-col items-center justify-center gap-2">
+  <%= image_tag "soo-logo-dark.svg", alt: site_title, width: 652, height: 251, fetchpriority: "high", class: "hidden #{width} max-w-full dark:block" %>
+  <%= image_tag "soo-logo-light.svg", alt: site_title, width: 652, height: 251, fetchpriority: "high", class: "#{width} max-w-full dark:hidden" %>
+  <% if tagline %>
+    <h2 class="mt-2 text-center font-mono text-muted-foreground">
+      The yearly survey about
+      <a href="https://omarchy.org/" target="_blank" rel="noopener">Omarchy Linux</a>
+    </h2>
+  <% end %>
+</div>

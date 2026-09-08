@@ -1,0 +1,9 @@
+<%= seo_tags "#{site_title} — Take the survey" %>
+<%= render layout: "shared/centered" do %>
+  <%= render "shared/logo" %>
+  <% if survey_launched? %>
+    <%= render "sessions/auth_card" %>
+  <% else %>
+    <%= render "waitlist_signups/card" %>
+  <% end %>
+<% end %>

@@ -1,0 +1,24 @@
+<%# locals: (question:, value:) %>
+<% selected = value&.kind == "multiple" ? value.option_ids : []
+   other = value&.kind == "multiple" ? value.other.to_s : ""
+   at_limit = question.limit && selected.length >= question.limit %>
+<div data-controller="choice" data-choice-other-id-value="<%= Survey::OTHER_OPTION_ID %>"
+     data-choice-limit-value="<%= question.limit %>" data-choice-exclusive-value="<%= question.exclusive_options.to_json %>">
+  <div class="space-y-3" role="group" aria-labelledby="<%= question.dom_id %>">
+    <% if question.limit %>
+      <p class="field-description"><span data-choice-target="count"><%= selected.length %></span> of <%= question.limit %> selected</p>
+    <% end %>
+    <% question.options_for_display.each do |option| %>
+      <% checked = selected.include?(option.id) %>
+      <div class="flex items-center gap-3">
+        <input type="checkbox" id="<%= question.id %>-<%= option.id %>" name="<%= answer_field(question, :option_ids, array: true) %>" value="<%= option.id %>"
+               class="checkbox" <%= "checked" if checked %> <%= "disabled" if at_limit && !checked %> data-action="choice#changed">
+        <label for="<%= question.id %>-<%= option.id %>" class="label font-normal"><%= option.label.presence || option.id %></label>
+      </div>
+    <% end %>
+  </div>
+  <% if question.allow_other? %>
+    <input type="text" name="<%= answer_field(question, :other) %>" value="<%= other %>" placeholder="Please specify" aria-label="Please specify"
+           class="input mt-2 max-w-sm" data-choice-target="other" <%= "hidden" unless selected.include?(Survey::OTHER_OPTION_ID) %>>
+  <% end %>
+</div>

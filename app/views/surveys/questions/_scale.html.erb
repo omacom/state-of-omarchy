@@ -1,0 +1,38 @@
+<%# locals: (question:, value:) %>
+<% min = question.min || (question.type == "nps" ? 0 : 1)
+   max = question.max || 5
+   current = value&.kind == "number" && value.value.is_a?(Integer) ? value.value : nil
+   labels = question.type == "scale" ? question.labels : {}
+   pct = max > min ? ((current || min) - min) * 100.0 / (max - min) : 0 %>
+<div class="space-y-3" data-controller="scale" data-scale-min-value="<%= min %>" data-scale-max-value="<%= max %>" data-scale-nps-value="<%= question.type == 'nps' %>">
+  <div class="pt-7">
+    <div class="relative">
+      <%# Floating value bubble, follows the thumb; unanswered shows no bubble. %>
+      <div class="scale-bubble" data-scale-target="bubble" style="left: <%= pct %>%" <%= "hidden" if current.nil? %>>
+        <span data-scale-target="bubbleText"><%= current %></span>
+        <span class="scale-bubble-arrow" aria-hidden="true"></span>
+      </div>
+      <%# Tick marks, one per step, sit on top of the track. %>
+      <div class="pointer-events-none absolute inset-x-2.5 top-1/2 z-[1] flex -translate-y-1/2 justify-between" data-scale-target="ticks">
+        <% (min..max).each do |n| %>
+          <span class="<%= n == (current || min) ? 'sr-only' : 'size-1 rounded-full bg-background/70' %>" data-tick="<%= n %>" aria-hidden="true"></span>
+        <% end %>
+      </div>
+      <input type="range" class="slider w-full" min="<%= min %>" max="<%= max %>" step="1" value="<%= current || min %>"
+             style="--fill: <%= pct %>%" aria-labelledby="<%= question.dom_id %>" aria-valuetext="<%= current %>"
+             data-scale-target="range" data-action="input->scale#changed">
+      <input type="hidden" name="<%= answer_field(question, :value) %>" value="<%= current %>" data-scale-target="value">
+    </div>
+  </div>
+  <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground">
+    <span class="max-w-[45%] break-words">
+      <span class="font-medium text-foreground"><%= min %></span><% if labels[min.to_s].present? %> — <%= labels[min.to_s] %><% end %>
+    </span>
+    <% if question.type == "nps" %>
+      <span class="font-medium text-foreground" aria-live="polite" data-scale-target="band"><%= nps_band(current) %></span>
+    <% end %>
+    <span class="ml-auto max-w-[45%] text-right break-words">
+      <span class="font-medium text-foreground"><%= max %></span><% if labels[max.to_s].present? %> — <%= labels[max.to_s] %><% end %>
+    </span>
+  </div>
+</div>

@@ -1,0 +1,7 @@
+<%= turbo_stream.replace "survey-progress", method: :morph, partial: "surveys/progress", locals: { survey: current_survey, answers: @answers } %>
+<%= turbo_stream.update "survey-section-counts", partial: "surveys/counts", locals: { counts: current_survey.section_counts(@section, @answers) } %>
+<%= turbo_stream.update "survey-stepper", partial: "surveys/stepper", locals: { survey: current_survey, answers: @answers, section: @section } %>
+<%= turbo_stream.update "survey-submit-summary", partial: "surveys/submit_summary", locals: { survey: current_survey, answers: @answers } %>
+<% @section.questions.each do |question| %>
+  <%= turbo_stream.update "q-error-#{question.id}", @errors[question.id].to_s %>
+<% end %>
