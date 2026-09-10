@@ -7,13 +7,20 @@ alias t := test
 alias sl := survey-lint
 alias i := install
 alias f := fix
+alias s := security
 
-# Everything CI runs: survey lint, rubocop, brakeman, and the test suite.
+# Everything CI runs: survey lint, rubocop, security scans, and the test suite.
 check:
     bin/rails survey:lint
     bin/rubocop
-    bin/brakeman --no-pager -q
+    just security
     bin/rails test
+
+# Gem, importmap and code security scans
+security:
+    bin/bundler-audit
+    bin/importmap audit
+    bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error
 
 # Runs the test suite once.
 test:
