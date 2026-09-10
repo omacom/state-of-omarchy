@@ -103,6 +103,17 @@ class SessionsTest < ActionDispatch::IntegrationTest
     assert_redirected_to survey_path(s: "themes")
   end
 
+  test "an idle-expired session is logged out and its cookie cleared" do
+    sign_in_as users(:taha)
+    session = users(:taha).sessions.last
+    session.update_column(:last_active_at, Session::IDLE_TIMEOUT.ago - 1.minute)
+
+    get survey_path
+    assert_redirected_to root_path
+    assert_empty cookies[:session_id].to_s
+    assert_not Session.exists?(session.id)
+  end
+
   test "before launch the sign-in endpoints are closed and home shows the waitlist" do
     with_survey_launched(false) do
       get root_path

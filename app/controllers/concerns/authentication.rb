@@ -42,7 +42,19 @@ module Authentication
     end
 
     def find_session_by_cookie
-      Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
+      return unless cookies.signed[:session_id]
+
+      session = Session.find_by(id: cookies.signed[:session_id])
+      return if session.nil?
+
+      if session.expired?
+        session.destroy
+        cookies.delete(:session_id)
+        return
+      end
+
+      session.touch_activity
+      session
     end
 
     def request_authentication
