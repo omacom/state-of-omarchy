@@ -103,6 +103,25 @@ class SessionsTest < ActionDispatch::IntegrationTest
     assert_redirected_to survey_path(s: "themes")
   end
 
+  test "too many sign-in requests trigger the rate limit" do
+    10.times { post session_path, params: { email_address: users(:taha).email_address } }
+
+    post session_path, params: { email_address: users(:taha).email_address }
+    assert_redirected_to root_path
+    follow_redirect!
+    assert_select "p[role=alert]", "Too many sign-in attempts. Try again in a few minutes."
+  end
+
+  test "too many code attempts trigger the rate limit" do
+    post session_path, params: { email_address: users(:taha).email_address }
+    10.times { post session_magic_link_path, params: { code: "ZZZZZZ" } }
+
+    post session_magic_link_path, params: { code: "ZZZZZZ" }
+    assert_redirected_to session_magic_link_path
+    follow_redirect!
+    assert_select "p[role=alert]", "Too many attempts. Try again in 15 minutes."
+  end
+
   test "an idle-expired session is logged out and its cookie cleared" do
     sign_in_as users(:taha)
     session = users(:taha).sessions.last

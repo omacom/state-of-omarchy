@@ -15,6 +15,7 @@ check:
     bin/rubocop
     just security
     bin/rails test
+    bin/rails test:system
 
 # Gem, importmap and code security scans
 security:
@@ -22,7 +23,7 @@ security:
     bin/importmap audit
     bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error
 
-# Runs the test suite once.
+# Runs the test suite once (add test:system to also drive the browser tests).
 test:
     bin/rails test
 

@@ -20,7 +20,10 @@ Rails.application.configure do
 
   # Show full error reports.
   config.consider_all_requests_local = true
-  config.cache_store = :null_store
+
+  # :null_store can't back `rate_limit` (its counters never persist), so tests couldn't
+  # exercise it. Nothing else in the app reads Rails.cache, so memory_store is a safe swap.
+  config.cache_store = :memory_store
 
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable

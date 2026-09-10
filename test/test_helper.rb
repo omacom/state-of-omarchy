@@ -12,6 +12,10 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
+    # Rate limiting counters live in Rails.cache; clear it so one test's requests
+    # never count against another test's rate limit in the same worker process.
+    setup { Rails.cache.clear }
+
     def current_survey
       Survey::Loader.load(Rails.configuration.x.survey.current_edition)
     end

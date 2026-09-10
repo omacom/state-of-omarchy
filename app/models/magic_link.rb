@@ -6,6 +6,11 @@ class MagicLink < ApplicationRecord
   CODE_LENGTH = 6
   EXPIRATION_TIME = 15.minutes
 
+  # How long the "Send email again" button stays disabled for. A mattr_accessor rather
+  # than a constant so system tests can shrink it (`MagicLink.resend_cooldown = ...`)
+  # instead of waiting out the real cooldown.
+  mattr_accessor :resend_cooldown, default: 20.seconds
+
   belongs_to :user
 
   has_secure_token :token, length: 36

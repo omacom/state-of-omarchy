@@ -30,6 +30,9 @@ jobs:
       - name: Audit gems
         run: bin/bundler-audit
 
+      - name: Audit importmap packages
+        run: bin/importmap audit
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +48,7 @@ jobs:
       - name: Run tests
         env:
           RAILS_ENV: test
-        run: bin/rails db:test:prepare test
+        run: bin/rails db:test:prepare test test:system
 
       - name: Build production assets
         env:

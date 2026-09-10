@@ -27,7 +27,7 @@
       <div class="flex flex-col items-center gap-1">
         <div class="flex items-center gap-1 text-sm">
           <span class="text-muted-foreground">Didn't get it?</span>
-          <%= form_with url: session_path, data: { controller: "cooldown", cooldown_seconds_value: 20 } do |f| %>
+          <%= form_with url: session_path, data: { controller: "cooldown", cooldown_seconds_value: MagicLink.resend_cooldown.to_i } do |f| %>
             <%= f.hidden_field :email_address, value: email_address_pending_authentication %>
             <%= f.button "Send email again", type: "submit", class: "btn btn-link h-auto p-0 text-sm",
                   data: { cooldown_target: "button", turbo_submits_with: "Resending…" } %>
